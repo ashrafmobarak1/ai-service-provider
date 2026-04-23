@@ -1,0 +1,15 @@
+E:\projects\ai-service-provider\src\ServiceMarketplace.Application\obj\Debug\net8.0\ServiceMarketplace.Application.csproj.AssemblyReference.cache
+E:\projects\ai-service-provider\src\ServiceMarketplace.Application\obj\Debug\net8.0\ServiceMarketplace.Application.GeneratedMSBuildEditorConfig.editorconfig
+E:\projects\ai-service-provider\src\ServiceMarketplace.Application\obj\Debug\net8.0\ServiceMarketplace.Application.AssemblyInfoInputs.cache
+E:\projects\ai-service-provider\src\ServiceMarketplace.Application\obj\Debug\net8.0\ServiceMarketplace.Application.AssemblyInfo.cs
+E:\projects\ai-service-provider\src\ServiceMarketplace.Application\obj\Debug\net8.0\ServiceMarketplace.Application.csproj.CoreCompileInputs.cache
+E:\projects\ai-service-provider\src\ServiceMarketplace.Application\bin\Debug\net8.0\ServiceMarketplace.Application.deps.json
+E:\projects\ai-service-provider\src\ServiceMarketplace.Application\bin\Debug\net8.0\ServiceMarketplace.Application.dll
+E:\projects\ai-service-provider\src\ServiceMarketplace.Application\bin\Debug\net8.0\ServiceMarketplace.Application.pdb
+E:\projects\ai-service-provider\src\ServiceMarketplace.Application\bin\Debug\net8.0\ServiceMarketplace.Domain.dll
+E:\projects\ai-service-provider\src\ServiceMarketplace.Application\bin\Debug\net8.0\ServiceMarketplace.Domain.pdb
+E:\projects\ai-service-provider\src\ServiceMarketplace.Application\obj\Debug\net8.0\ServiceM.C5A64AF1.Up2Date
+E:\projects\ai-service-provider\src\ServiceMarketplace.Application\obj\Debug\net8.0\ServiceMarketplace.Application.dll
+E:\projects\ai-service-provider\src\ServiceMarketplace.Application\obj\Debug\net8.0\refint\ServiceMarketplace.Application.dll
+E:\projects\ai-service-provider\src\ServiceMarketplace.Application\obj\Debug\net8.0\ServiceMarketplace.Application.pdb
+E:\projects\ai-service-provider\src\ServiceMarketplace.Application\obj\Debug\net8.0\ref\ServiceMarketplace.Application.dll

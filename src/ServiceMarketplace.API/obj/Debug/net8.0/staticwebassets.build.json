@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "PCdh2GOOKXbcEUpvysX8ctu3xmh/wgQURZb0snf4p6w=",
+  "Source": "ServiceMarketplace.API",
+  "BasePath": "_content/ServiceMarketplace.API",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
