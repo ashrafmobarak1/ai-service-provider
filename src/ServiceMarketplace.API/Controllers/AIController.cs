@@ -22,12 +22,15 @@ public class AIController : ControllerBase
     /// Non-blocking — if AI fails, the original description is unchanged.
     /// </summary>
     [HttpPost("{id:guid}/enhance")]
-    [ProducesResponseType(typeof(EnhanceDescriptionDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status202Accepted)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Enhance(Guid id)
     {
-        var result = await _aiService.EnhanceDescriptionAsync(id);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(new { error = result.Error });
+        var result = await _aiService.EnqueueEnhancementJobAsync(id);
+        if (!result.IsSuccess)
+            return BadRequest(new { error = result.Error });
+
+        return Accepted(new { jobId = result.Value, message = "AI enhancement has been queued. The description will be updated shortly." });
     }
 }

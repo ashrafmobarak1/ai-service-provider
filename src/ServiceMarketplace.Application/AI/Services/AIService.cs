@@ -3,6 +3,7 @@ using ServiceMarketplace.Application.AI.Interfaces;
 using ServiceMarketplace.Application.Common;
 using ServiceMarketplace.Application.Requests.Interfaces;
 using ServiceMarketplace.Domain.Entities;
+using Hangfire;
 
 namespace ServiceMarketplace.Application.AI.Services;
 
@@ -10,20 +11,32 @@ public class AIService : IAIService
 {
     private readonly IServiceRequestRepository _requestRepository;
     private readonly IAIGateway _aiGateway;
+    private readonly IBackgroundJobClient _backgroundJobClient;
 
     public AIService(
         IServiceRequestRepository requestRepository,
-        IAIGateway aiGateway)
+        IAIGateway aiGateway,
+        IBackgroundJobClient backgroundJobClient)
     {
         _requestRepository = requestRepository;
         _aiGateway = aiGateway;
+        _backgroundJobClient = backgroundJobClient;
     }
 
-    public async Task<Result<EnhanceDescriptionDto>> EnhanceDescriptionAsync(Guid requestId)
+    public async Task<Result<string>> EnqueueEnhancementJobAsync(Guid requestId)
     {
         var request = await _requestRepository.GetByIdAsync(requestId);
         if (request == null)
-            return Result<EnhanceDescriptionDto>.Failure("Service request not found.");
+            return Result<string>.Failure("Service request not found.");
+
+        var jobId = _backgroundJobClient.Enqueue<IAIService>(x => x.ProcessEnhancementJobAsync(requestId));
+        return Result<string>.Success(jobId);
+    }
+
+    public async Task ProcessEnhancementJobAsync(Guid requestId)
+    {
+        var request = await _requestRepository.GetByIdAsync(requestId);
+        if (request == null) return;
 
         try
         {
@@ -33,18 +46,11 @@ public class AIService : IAIService
             request.UpdatedAt = DateTime.UtcNow;
             
             await _requestRepository.UpdateAsync(request);
-
-            return Result<EnhanceDescriptionDto>.Success(new EnhanceDescriptionDto
-            {
-                OriginalTitle = request.Title,
-                OriginalDescription = request.Description,
-                EnhancedDescription = enhancedText
-            });
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            // Logging would go here in a real app
-            return Result<EnhanceDescriptionDto>.Failure($"AI enhancement failed: {ex.Message}. The core request remains valid.");
+            // In a real app, Hangfire will automatically retry based on the exception.
+            throw; 
         }
     }
 }

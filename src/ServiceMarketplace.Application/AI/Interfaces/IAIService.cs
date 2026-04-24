@@ -6,8 +6,13 @@ namespace ServiceMarketplace.Application.AI.Interfaces;
 public interface IAIService
 {
     /// <summary>
-    /// Sends the request title and description to the AI model and returns
-    /// a cleaner, more professional version of the description.
+    /// Enqueues a background job to enhance the description.
+    /// Returns the Hangfire JobId.
     /// </summary>
-    Task<Result<EnhanceDescriptionDto>> EnhanceDescriptionAsync(Guid requestId);
+    Task<Result<string>> EnqueueEnhancementJobAsync(Guid requestId);
+
+    /// <summary>
+    /// The actual logic executed by the background worker.
+    /// </summary>
+    Task ProcessEnhancementJobAsync(Guid requestId);
 }

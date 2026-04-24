@@ -9,6 +9,9 @@ using ServiceMarketplace.Infrastructure.AI;
 using ServiceMarketplace.Infrastructure.Identity;
 using ServiceMarketplace.Infrastructure.Persistence;
 using ServiceMarketplace.Infrastructure.Persistence.Repositories;
+using Hangfire;
+using Hangfire.MySql;
+using System.Transactions;
 
 namespace ServiceMarketplace.Infrastructure;
 
@@ -24,6 +27,22 @@ public static class InfrastructureExtensions
             var connectionString = configuration.GetConnectionString("DefaultConnection");
             options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 21)));
         });
+
+        // ── Hangfire ─────────────────────────────────────────────────────────
+        services.AddHangfire(config => config
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UseStorage(new MySqlStorage(configuration.GetConnectionString("DefaultConnection"), new MySqlStorageOptions
+            {
+                TransactionIsolationLevel = IsolationLevel.ReadCommitted,
+                QueuePollInterval = TimeSpan.FromSeconds(15),
+                JobExpirationCheckInterval = TimeSpan.FromHours(1),
+                CountersAggregateInterval = TimeSpan.FromMinutes(5),
+                PrepareSchemaIfNecessary = true,
+            })));
+
+        services.AddHangfireServer();
 
         // ── Repositories ─────────────────────────────────────────────────────
         services.AddScoped<IUserRepository, UserRepository>();
