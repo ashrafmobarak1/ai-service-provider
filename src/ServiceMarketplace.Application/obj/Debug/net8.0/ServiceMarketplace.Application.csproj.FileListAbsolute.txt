@@ -13,3 +13,4 @@ E:\projects\ai-service-provider\src\ServiceMarketplace.Application\obj\Debug\net
 E:\projects\ai-service-provider\src\ServiceMarketplace.Application\obj\Debug\net8.0\refint\ServiceMarketplace.Application.dll
 E:\projects\ai-service-provider\src\ServiceMarketplace.Application\obj\Debug\net8.0\ServiceMarketplace.Application.pdb
 E:\projects\ai-service-provider\src\ServiceMarketplace.Application\obj\Debug\net8.0\ref\ServiceMarketplace.Application.dll
+E:\projects\ai-service-provider\src\ServiceMarketplace.Application\obj\Debug\net8.0\ServiceMarketplace.Application.sourcelink.json

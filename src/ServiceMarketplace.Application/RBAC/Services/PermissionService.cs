@@ -18,6 +18,9 @@ public class PermissionService : IPermissionService
     ///   3. Grant via role_permissions         → GRANT
     ///   4. Default                            → DENY
     /// </summary>
-    public Task<bool> HasPermissionAsync(Guid userId, string permissionName)
-        => throw new NotImplementedException();
+    public async Task<bool> HasPermissionAsync(Guid userId, string permissionName)
+    {
+        var effectivePermissions = await _permissionRepository.GetEffectivePermissionsAsync(userId);
+        return effectivePermissions.Contains(permissionName);
+    }
 }

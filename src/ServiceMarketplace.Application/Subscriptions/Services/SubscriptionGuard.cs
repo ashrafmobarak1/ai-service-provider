@@ -22,6 +22,22 @@ public class SubscriptionGuard : ISubscriptionGuard
         _requestRepository = requestRepository;
     }
 
-    public Task<Result> CheckRequestCreationAllowedAsync(Guid userId)
-        => throw new NotImplementedException();
+    public async Task<Result> CheckRequestCreationAllowedAsync(Guid userId)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+            return Result.Failure("User not found.");
+
+        if (user.Subscription == SubscriptionTier.Paid)
+            return Result.Success();
+
+        // Free tier logic
+        var activeRequestsCount = await _requestRepository.CountActiveByCustomerAsync(userId);
+        if (activeRequestsCount >= FreeTierMaxRequests)
+        {
+            return Result.Failure($"Free tier limit reached. Maximum of {FreeTierMaxRequests} active requests allowed. Please upgrade to Paid tier for unlimited requests.");
+        }
+
+        return Result.Success();
+    }
 }

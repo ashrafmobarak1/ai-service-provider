@@ -9,3 +9,4 @@ E:\projects\ai-service-provider\src\ServiceMarketplace.Domain\obj\Debug\net8.0\S
 E:\projects\ai-service-provider\src\ServiceMarketplace.Domain\obj\Debug\net8.0\refint\ServiceMarketplace.Domain.dll
 E:\projects\ai-service-provider\src\ServiceMarketplace.Domain\obj\Debug\net8.0\ServiceMarketplace.Domain.pdb
 E:\projects\ai-service-provider\src\ServiceMarketplace.Domain\obj\Debug\net8.0\ref\ServiceMarketplace.Domain.dll
+E:\projects\ai-service-provider\src\ServiceMarketplace.Domain\obj\Debug\net8.0\ServiceMarketplace.Domain.sourcelink.json

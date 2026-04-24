@@ -17,3 +17,4 @@ E:\projects\ai-service-provider\src\ServiceMarketplace.Infrastructure\obj\Debug\
 E:\projects\ai-service-provider\src\ServiceMarketplace.Infrastructure\obj\Debug\net8.0\ServiceMarketplace.Infrastructure.pdb
 E:\projects\ai-service-provider\src\ServiceMarketplace.Infrastructure\obj\Debug\net8.0\ServiceMarketplace.Infrastructure.genruntimeconfig.cache
 E:\projects\ai-service-provider\src\ServiceMarketplace.Infrastructure\obj\Debug\net8.0\ref\ServiceMarketplace.Infrastructure.dll
+E:\projects\ai-service-provider\src\ServiceMarketplace.Infrastructure\obj\Debug\net8.0\ServiceMarketplace.Infrastructure.sourcelink.json

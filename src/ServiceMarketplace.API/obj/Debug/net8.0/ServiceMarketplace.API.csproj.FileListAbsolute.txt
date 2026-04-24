@@ -120,3 +120,4 @@ E:\projects\ai-service-provider\src\ServiceMarketplace.API\obj\Debug\net8.0\Serv
 E:\projects\ai-service-provider\src\ServiceMarketplace.API\obj\Debug\net8.0\ref\ServiceMarketplace.API.dll
 E:\projects\ai-service-provider\src\ServiceMarketplace.API\bin\Debug\net8.0\MySqlConnector.dll
 E:\projects\ai-service-provider\src\ServiceMarketplace.API\bin\Debug\net8.0\Pomelo.EntityFrameworkCore.MySql.dll
+E:\projects\ai-service-provider\src\ServiceMarketplace.API\obj\Debug\net8.0\ServiceMarketplace.API.sourcelink.json
