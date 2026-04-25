@@ -44,10 +44,36 @@ public class PermissionRepository : IPermissionRepository
             .Select(up => up.Permission.Name)
             .ToListAsync();
 
-        // Role grants
-        var roleGrants = await _context.UserRoles
+        // Get initial roles assigned to the user
+        var userRoleIds = await _context.UserRoles
             .Where(ur => ur.UserId == userId)
-            .SelectMany(ur => ur.Role.RolePermissions)
+            .Select(ur => ur.RoleId)
+            .ToListAsync();
+
+        // Recursively find all descendant roles (child roles)
+        var allRoleIds = new HashSet<Guid>(userRoleIds);
+        var rolesToProcess = new Queue<Guid>(userRoleIds);
+
+        while (rolesToProcess.Count > 0)
+        {
+            var parentId = rolesToProcess.Dequeue();
+            var children = await _context.Roles
+                .Where(r => r.ParentRoleId == parentId)
+                .Select(r => r.Id)
+                .ToListAsync();
+
+            foreach (var childId in children)
+            {
+                if (allRoleIds.Add(childId))
+                {
+                    rolesToProcess.Enqueue(childId);
+                }
+            }
+        }
+
+        // Collect permissions from all identified roles
+        var roleGrants = await _context.RolePermissions
+            .Where(rp => allRoleIds.Contains(rp.RoleId))
             .Select(rp => rp.Permission.Name)
             .ToListAsync();
 

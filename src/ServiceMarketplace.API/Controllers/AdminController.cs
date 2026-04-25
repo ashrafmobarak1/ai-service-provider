@@ -14,15 +14,18 @@ public class AdminController : ControllerBase
 {
     private readonly IRoleRepository _roleRepository;
     private readonly IPermissionRepository _permissionRepository;
+    private readonly IUserRepository _userRepository;
     private readonly ICurrentUser _currentUser;
 
     public AdminController(
         IRoleRepository roleRepository,
         IPermissionRepository permissionRepository,
+        IUserRepository userRepository,
         ICurrentUser currentUser)
     {
         _roleRepository = roleRepository;
         _permissionRepository = permissionRepository;
+        _userRepository = userRepository;
         _currentUser = currentUser;
     }
 
@@ -114,8 +117,12 @@ public class AdminController : ControllerBase
     [HttpPost("users/{userId:guid}/permissions/{permissionId:guid}")]
     [RequiresPermission("role.manage")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GrantDirectPermission(Guid userId, Guid permissionId)
     {
+        if (!await CanManageUserAsync(userId))
+            return Forbid();
+
         await _permissionRepository.GrantDirectPermissionAsync(userId, permissionId, _currentUser.Id, isGranted: true);
         return NoContent();
     }
@@ -124,9 +131,25 @@ public class AdminController : ControllerBase
     [HttpDelete("users/{userId:guid}/permissions/{permissionId:guid}")]
     [RequiresPermission("role.manage")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DenyDirectPermission(Guid userId, Guid permissionId)
     {
+        if (!await CanManageUserAsync(userId))
+            return Forbid();
+
         await _permissionRepository.GrantDirectPermissionAsync(userId, permissionId, _currentUser.Id, isGranted: false);
         return NoContent();
+    }
+
+    private async Task<bool> CanManageUserAsync(Guid targetUserId)
+    {
+        var roles = await _userRepository.GetRoleNamesAsync(_currentUser.Id);
+        if (roles.Contains("Admin")) return true;
+
+        var targetUser = await _userRepository.GetByIdAsync(targetUserId);
+        if (targetUser == null) return false;
+
+        // ProviderAdmin can manage their own employees
+        return targetUser.EmployerId == _currentUser.Id;
     }
 }

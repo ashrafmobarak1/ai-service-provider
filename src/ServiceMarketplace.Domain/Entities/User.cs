@@ -14,6 +14,8 @@ public class User
 
     public SubscriptionTier Subscription { get; set; } = SubscriptionTier.Free;
 
+    public Guid? EmployerId { get; set; }
+
     public bool IsActive { get; set; } = true;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -21,6 +23,10 @@ public class User
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation properties
+    public User? Employer { get; set; }
+
+    public ICollection<User> Employees { get; set; } = new List<User>();
+
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 
     public ICollection<UserPermission> UserPermissions { get; set; } = new List<UserPermission>();

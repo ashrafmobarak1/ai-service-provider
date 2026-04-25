@@ -1,7 +1,7 @@
 # Service Marketplace Platform — MVP
 
 A fullstack service marketplace where customers create service requests and providers accept them nearby.
-Built with **ASP.NET Core 8 Web API** + **PostgreSQL** + **React** (frontend, separate).
+Built with **ASP.NET Core 8 Web API** + **MySQL 8** + **React** (frontend, separate).
 
 ---
 
@@ -33,7 +33,7 @@ Built with **ASP.NET Core 8 Web API** + **PostgreSQL** + **React** (frontend, se
 |---|---|
 | **Customer** | Register, create service requests, view own requests |
 | **Provider** | View all pending requests, filter nearby, accept & complete |
-| **ProviderAdmin** | All Provider actions + manage permissions for their team |
+| **ProviderAdmin** | All Provider actions + manage permissions for their team (employees) |
 | **Admin** | Full access — manage users, roles, permissions |
 
 **Request lifecycle:** `pending → accepted → completed`
@@ -46,7 +46,7 @@ Built with **ASP.NET Core 8 Web API** + **PostgreSQL** + **React** (frontend, se
 |---|---|
 | Backend | ASP.NET Core 8 Web API |
 | ORM | Entity Framework Core 8 |
-| Database | PostgreSQL 16 |
+| Database | MySQL 8.0+ |
 | Auth | JWT Bearer tokens |
 | Password | BCrypt |
 | AI Feature | Claude API (claude-haiku-4-5) |
@@ -99,7 +99,7 @@ POST /api/requests
       │  calls IServiceRequestRepository.AddAsync(entity)
       │  optionally calls IAIService.EnhanceDescriptionAsync(...)
       ▼
-[ServiceRequestRepository]   → EF Core → PostgreSQL
+[ServiceRequestRepository]   → EF Core → MySQL
       │
       ▼
 Result<ServiceRequestDto>    → 201 Created
@@ -234,9 +234,10 @@ name            VARCHAR(100)    NOT NULL
 email           VARCHAR(255)    NOT NULL  UNIQUE
 password_hash   VARCHAR(255)    NOT NULL
 subscription    ENUM            'free' | 'paid'   DEFAULT 'free'
+employer_id     UUID            FK → users.id   (Self-reference for team)
 is_active       BOOLEAN         DEFAULT true
-created_at      TIMESTAMPTZ
-updated_at      TIMESTAMPTZ
+created_at      DATETIME
+updated_at      DATETIME
 
 
 roles
@@ -245,7 +246,7 @@ id              UUID            PK
 name            VARCHAR(50)     NOT NULL  UNIQUE
 description     VARCHAR(255)
 parent_role_id  UUID            FK → roles.id   (self-reference for hierarchy)
-created_at      TIMESTAMPTZ
+created_at      DATETIME
 
 
 permissions
@@ -255,14 +256,14 @@ name        VARCHAR(100)    NOT NULL  UNIQUE   e.g. "request.create"
 resource    VARCHAR(50)                        e.g. "request"
 action      VARCHAR(50)                        e.g. "create"
 description VARCHAR(255)
-created_at  TIMESTAMPTZ
+created_at  DATETIME
 
 
 role_permissions
 ─────────────────────────────────────────────────────
 role_id         UUID    PK + FK → roles.id       CASCADE DELETE
 permission_id   UUID    PK + FK → permissions.id CASCADE DELETE
-created_at      TIMESTAMPTZ
+created_at      DATETIME
 
 
 user_roles
@@ -270,7 +271,7 @@ user_roles
 user_id     UUID    PK + FK → users.id    CASCADE DELETE
 role_id     UUID    PK + FK → roles.id    CASCADE DELETE
 assigned_by UUID    FK → users.id         SET NULL
-assigned_at TIMESTAMPTZ
+assigned_at DATETIME
 
 
 user_permissions   ← direct grants or explicit denies
@@ -279,7 +280,7 @@ user_id         UUID    PK + FK → users.id
 permission_id   UUID    PK + FK → permissions.id
 is_granted      BOOLEAN          true = grant, false = explicit deny
 granted_by      UUID    FK → users.id
-granted_at      TIMESTAMPTZ
+granted_at      DATETIME
 
 
 service_requests
@@ -289,15 +290,15 @@ title           VARCHAR(200)    NOT NULL
 description     TEXT            NOT NULL
 ai_description  TEXT            nullable — set after AI enhancement
 status          ENUM            'pending' | 'accepted' | 'completed' | 'cancelled'
-latitude        DOUBLE PRECISION NOT NULL
-longitude       DOUBLE PRECISION NOT NULL
+latitude        DOUBLE          NOT NULL
+longitude       DOUBLE          NOT NULL
 address         VARCHAR(500)
 customer_id     UUID    FK → users.id    RESTRICT
 provider_id     UUID    FK → users.id    SET NULL (null until accepted)
-accepted_at     TIMESTAMPTZ
-completed_at    TIMESTAMPTZ
-created_at      TIMESTAMPTZ
-updated_at      TIMESTAMPTZ
+accepted_at     DATETIME
+completed_at    DATETIME
+created_at      DATETIME
+updated_at      DATETIME
 
 
 subscription_plans   ← reference / config table
@@ -347,8 +348,16 @@ user.manage       role.manage
 ```
 1. Check user_permissions WHERE is_granted = false  →  DENY  (explicit deny wins)
 2. Check user_permissions WHERE is_granted = true   →  GRANT (direct grant)
-3. Check role_permissions via user_roles             →  GRANT (role default)
+3. Check role_permissions via user_roles + hierarchy →  GRANT (role default + children)
 4. Default                                           →  DENY
+
+### Role Hierarchy
+
+The system supports **recursive inheritance**. A parent role automatically inherits all permissions 
+assigned to its child roles.
+
+*Example:* `ProviderAdmin` is the parent of `Provider`. If `request.accept` is assigned 
+to `Provider`, any user with the `ProviderAdmin` role also receives it.
 ```
 
 ### Enforcement at API Level
@@ -363,11 +372,11 @@ public async Task<IActionResult> Create([FromBody] CreateRequestDto dto) { ... }
 // returns 403 Forbidden if false — before the controller body executes.
 ```
 
-### Role Hierarchy
+### Delegated Management
 
-`ProviderAdmin` has `parent_role_id = null` but `Provider.parent_role_id = ProviderAdmin.id`.
-This allows a ProviderAdmin to grant/revoke Provider-level permissions to users who share
-the same parent role — enforced in `PermissionService`, not at DB level.
+`ProviderAdmin` users can manage direct permission overrides for their employees. This is 
+enforced in `AdminController` by checking if the target user's `EmployerId` matches the 
+current user's ID.
 
 ### Dynamic Assignment (Admin API)
 
@@ -436,8 +445,8 @@ Exposed via:
 GET /api/requests/nearby?lat=31.5&lng=34.8&radiusKm=10
 ```
 
-Upgrade path if needed: add a `GEOGRAPHY(Point, 4326)` column and `ST_DWithin` index
-(PostGIS) without redesigning the schema.
+Upgrade path if needed: use `Spatial` columns and `ST_Distance` index 
+(MySQL Spatial Extensions) without redesigning the schema.
 
 ---
 
@@ -526,7 +535,7 @@ Full interactive docs available at `/swagger` when running.
 ### Prerequisites
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [PostgreSQL 16](https://www.postgresql.org/download/) (or use Docker)
+- [MySQL 8.0+](https://dev.mysql.com/downloads/installer/) (or use Docker)
 - [Node.js 20+](https://nodejs.org/) (for frontend)
 
 ---
@@ -544,7 +553,7 @@ cd ServiceMarketplace
 cp .env.example .env
 # Edit .env — set CLAUDE_API_KEY at minimum
 
-# Start all services (API + PostgreSQL)
+# Start all services (API + MySQL)
 docker compose up --build
 ```
 
@@ -552,7 +561,7 @@ docker compose up --build
 |---|---|
 | API | http://localhost:5000 |
 | Swagger | http://localhost:5000/swagger |
-| PostgreSQL | localhost:5432 |
+| MySQL | localhost:3306 |
 
 To stop:
 
@@ -566,9 +575,9 @@ docker compose down -v
 
 ## 13. Running Locally (without Docker)
 
-### 1. PostgreSQL
+### 1. MySQL
 
-Make sure PostgreSQL is running and create the database:
+Make sure MySQL is running and create the database:
 
 ```sql
 CREATE DATABASE service_marketplace;
@@ -581,7 +590,7 @@ Edit `src/ServiceMarketplace.API/appsettings.Development.json`:
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5432;Database=service_marketplace;Username=postgres;Password=yourpassword"
+    "DefaultConnection": "Server=localhost;Port=3306;Database=service_marketplace;User=root;Password=yourpassword"
   },
   "Jwt": {
     "Key": "your-secret-key-minimum-32-characters-long",
@@ -627,7 +636,7 @@ Password: Admin@123456
 
 | Variable | Description | Default |
 |---|---|---|
-| `ConnectionStrings__DefaultConnection` | PostgreSQL connection string | — |
+| `ConnectionStrings__DefaultConnection` | MySQL connection string | — |
 | `Jwt__Key` | JWT signing secret (min 32 chars) | — |
 | `Jwt__ExpiryMinutes` | Token lifetime in minutes | `60` |
 | `AI__ApiKey` | Claude API key | — |
@@ -635,9 +644,19 @@ Password: Admin@123456
 
 ---
 
-## 15. Key Design Decisions & Trade-offs
+### Recursive Role Hierarchy (Inheritance flow)
 
-### Result\<T\> over exceptions for expected failures
+I chose a **Parent → Child** inheritance model where parents inherit from children.
+In the database, the child stores the `ParentRoleId`. When resolving permissions, we 
+recursively find all descendants of the user's roles. This makes it easy to create 
+specialized roles that build upon base roles (e.g., `ProviderAdmin` building on `Provider`).
+
+### Delegated Permission Management
+
+To satisfy the requirement that a `ProviderAdmin` can manage their team, I added 
+`EmployerId` to the `User` entity. This creates a clear ownership structure that 
+allows the API to enforce management boundaries without needing a complex 
+multi-tenancy implementation for the MVP.
 
 Services return `Result<T>` (success/failure + message) instead of throwing exceptions.
 Only truly unexpected errors bubble to `ExceptionHandlingMiddleware`.
@@ -684,8 +703,7 @@ explicitly enhanced. This keeps the core flow reliable.
 - "Active requests" for the subscription limit means `status IN ('pending', 'accepted')` —
   completed and cancelled requests do not count against the limit.
 - A Provider can only accept requests they have not already accepted (one provider per request).
-- ProviderAdmin can only manage permissions for users who share the `Provider` role —
-  not arbitrary users. This scope check is enforced in `PermissionService`, not DB constraints.
+- ProviderAdmin can only manage permissions for users who have them set as their `Employer`.
 - Email is case-insensitively unique (stored as-is, compared lowercased).
 - JWT tokens are not revocable in MVP — logout is client-side only. A token blacklist
   (Redis) would be the production solution.
