@@ -14,15 +14,28 @@ public class ClaudeAIGateway : IAIGateway
 {
     private readonly HttpClient _httpClient;
     private readonly string _model;
+    private readonly string? _apiKey;
 
     public ClaudeAIGateway(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
         _model = configuration["AI:Model"] ?? "claude-haiku-4-5-20251001";
+        _apiKey = configuration["AI:ApiKey"];
     }
 
     public async Task<string> EnhanceTextAsync(string title, string description)
     {
+        if (string.IsNullOrWhiteSpace(_apiKey) || _apiKey == "MOCK")
+        {
+            // Simulating AI processing time
+            await Task.Delay(1000); 
+            return $"[AI MOCK ENHANCEMENT]\n" +
+                   $"Service Title: {title}\n" +
+                   $"Original Details: {description}\n\n" +
+                   $"Refined Description: We need a professional service for '{title}'. " +
+                   $"The client has specified: {description}. Please provide quotes based on these requirements.";
+        }
+
         var prompt =
             $"You are a service marketplace assistant.\n" +
             $"Given a service request title and description, rewrite the description to be " +
