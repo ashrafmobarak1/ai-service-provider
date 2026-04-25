@@ -11,14 +11,30 @@ const ProviderDashboard = () => {
 
   const fetchRequests = async () => {
     try {
-      // For providers, we fetch all pending requests plus their own accepted requests
-      const [allRes, myRes] = await Promise.all([
-        requestService.getPending(),
+      let locationParams = null;
+      
+      // Try to get current location
+      if (navigator.geolocation) {
+        const position = await new Promise((resolve) => {
+          navigator.geolocation.getCurrentPosition(resolve, () => resolve(null));
+        });
+        
+        if (position) {
+          locationParams = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            radiusKm: 50 // Default radius
+          };
+        }
+      }
+
+      const [nearbyRes, myRes] = await Promise.all([
+        locationParams ? requestService.getNearby(locationParams) : requestService.getPending(),
         requestService.getMyRequests()
       ]);
       
       // Combine and remove duplicates by ID
-      const combined = [...myRes.data, ...allRes.data.filter(r => !myRes.data.find(m => m.id === r.id))];
+      const combined = [...myRes.data, ...nearbyRes.data.filter(r => !myRes.data.find(m => m.id === r.id))];
       setRequests(combined);
     } catch (err) {
       console.error('Failed to fetch requests', err);
@@ -80,8 +96,9 @@ const ProviderDashboard = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
                     <h4 style={{ fontSize: '1.2rem', fontWeight: '600' }}>{req.title}</h4>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '4px' }}>
-                      <Clock size={12} /> {new Date(req.createdAt).toLocaleDateString()}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '4px' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={12} /> {new Date(req.createdAt).toLocaleDateString()}</span>
+                      {req.distanceKm && <span style={{ color: 'var(--primary)', fontWeight: '600' }}>📍 {req.distanceKm} km away</span>}
                     </div>
                   </div>
                   <span style={{ 

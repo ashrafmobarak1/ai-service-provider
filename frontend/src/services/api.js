@@ -24,6 +24,7 @@ export const requestService = {
   create: (data) => api.post('/requests', data),
   getMyRequests: () => api.get('/requests/my'),
   getPending: () => api.get('/requests/all'),
+  getNearby: (params) => api.get('/requests/nearby', { params }),
   accept: (id) => api.put(`/requests/${id}/accept`),
   complete: (id) => api.put(`/requests/${id}/complete`),
   cancel: (id) => api.delete(`/requests/${id}`),

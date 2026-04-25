@@ -77,10 +77,10 @@ public static class DataSeeder
             "user.manage", "role.manage");
 
         await AssignRolePermissionsAsync(context, "ProviderAdmin",
-            "request.view_all", "request.accept", "request.complete", "role.manage");
+            "request.view_all", "request.accept", "request.complete", "request.view_own", "role.manage");
 
         await AssignRolePermissionsAsync(context, "Provider",
-            "request.view_all", "request.accept", "request.complete");
+            "request.view_all", "request.accept", "request.complete", "request.view_own");
 
         await AssignRolePermissionsAsync(context, "Customer",
             "request.create", "request.view_own", "request.cancel");

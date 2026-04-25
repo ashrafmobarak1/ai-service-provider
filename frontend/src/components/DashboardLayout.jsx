@@ -21,11 +21,18 @@ const DashboardLayout = ({ children }) => {
     navigate('/');
   };
 
+  const isProvider = user?.roles?.some(r => 
+    r.toLowerCase() === 'provider' || r.toLowerCase() === 'admin'
+  );
+
   const menuItems = [
     { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/dashboard' },
-    { icon: <PlusCircle size={20} />, label: 'New Request', path: '/dashboard/new-request' },
     { icon: <ClipboardList size={20} />, label: 'My Requests', path: '/dashboard/requests' },
   ];
+
+  if (!isProvider) {
+    menuItems.splice(1, 0, { icon: <PlusCircle size={20} />, label: 'New Request', path: '/dashboard/new-request' });
+  }
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-dark)' }}>
