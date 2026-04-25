@@ -21,6 +21,12 @@ public class ExceptionHandlingMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        if (context.Request.Path.StartsWithSegments("/hangfire"))
+        {
+            await _next(context);
+            return;
+        }
+
         try
         {
             await _next(context);
