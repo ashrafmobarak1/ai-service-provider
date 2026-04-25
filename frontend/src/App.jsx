@@ -4,7 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import CustomerDashboard from './pages/CustomerDashboard';
+import Dashboard from './pages/Dashboard';
 import CreateRequestForm from './pages/CreateRequestForm';
 import DashboardLayout from './components/DashboardLayout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -23,7 +23,7 @@ function App() {
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <DashboardLayout>
-                <CustomerDashboard />
+                <Dashboard />
               </DashboardLayout>
             </ProtectedRoute>
           } />
@@ -39,7 +39,7 @@ function App() {
           <Route path="/dashboard/requests" element={
             <ProtectedRoute>
               <DashboardLayout>
-                <CustomerDashboard />
+                <Dashboard />
               </DashboardLayout>
             </ProtectedRoute>
           } />
