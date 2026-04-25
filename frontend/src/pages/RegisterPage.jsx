@@ -8,6 +8,7 @@ const RegisterPage = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('Customer');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { login } = useAuth();
@@ -19,7 +20,7 @@ const RegisterPage = () => {
     setError('');
 
     try {
-      const { data } = await authService.register(name, email, password);
+      const { data } = await authService.register(name, email, password, role);
       login(
         { id: data.userId, email: data.email, roles: data.roles, name: name }, 
         data.accessToken
@@ -81,6 +82,18 @@ const RegisterPage = () => {
               onChange={(e) => setPassword(e.target.value)}
               style={{ paddingLeft: '44px' }}
             />
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Account Type</label>
+            <select 
+              value={role} 
+              onChange={(e) => setRole(e.target.value)}
+              style={{ width: '100%', padding: '12px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'white' }}
+            >
+              <option value="Customer">I am a Customer</option>
+              <option value="Provider">I am a Service Provider</option>
+            </select>
           </div>
 
           <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '14px', marginTop: '10px' }} disabled={loading}>

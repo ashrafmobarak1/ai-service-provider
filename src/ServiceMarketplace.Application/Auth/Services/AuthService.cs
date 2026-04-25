@@ -40,14 +40,15 @@ public class AuthService : IAuthService
 
         await _userRepository.AddAsync(user);
 
-        // Assign default role
-        var customerRole = await _roleRepository.GetByNameAsync("Customer");
-        if (customerRole != null)
+        // Assign chosen role (default to Customer if invalid)
+        var roleName = (dto.Role == "Provider") ? "Provider" : "Customer";
+        var role = await _roleRepository.GetByNameAsync(roleName);
+        if (role != null)
         {
-            await _roleRepository.AssignRoleToUserAsync(user.Id, customerRole.Id);
+            await _roleRepository.AssignRoleToUserAsync(user.Id, role.Id);
         }
 
-        var roles = new[] { "Customer" };
+        var roles = new[] { roleName };
         var token = _jwtService.GenerateToken(user, roles);
 
         return Result<TokenDto>.Success(new TokenDto

@@ -103,9 +103,14 @@ const ProviderDashboard = () => {
 
                 <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
                   {req.status === 'Pending' && (
-                    <button onClick={() => handleAccept(req.id)} className="btn btn-primary" style={{ flex: 1 }}>
-                      <HandCoins size={18} /> Accept Job
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
+                      <button onClick={() => handleAccept(req.id)} className="btn btn-primary" style={{ flex: 2 }}>
+                        <HandCoins size={18} /> Accept
+                      </button>
+                      <button className="btn btn-outline" style={{ flex: 1, color: 'var(--accent)' }}>
+                        Reject
+                      </button>
+                    </div>
                   )}
                   {req.status === 'Accepted' && isMine && (
                     <button onClick={() => handleComplete(req.id)} className="btn" style={{ flex: 1, background: 'var(--success)', color: 'white' }}>

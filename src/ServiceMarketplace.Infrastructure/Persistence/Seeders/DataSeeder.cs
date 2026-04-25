@@ -15,6 +15,7 @@ public static class DataSeeder
         await SeedPermissionsAsync(context);
         await SeedRolesAsync(context);
         await SeedAdminUserAsync(context);
+        await SeedProviderUserAsync(context);
     }
 
     private static async Task SeedPermissionsAsync(AppDbContext context)
@@ -125,6 +126,32 @@ public static class DataSeeder
         await context.SaveChangesAsync();
 
         context.UserRoles.Add(new UserRole { UserId = admin.Id, RoleId = adminRole.Id });
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedProviderUserAsync(AppDbContext context)
+    {
+        const string providerEmail = "provider@marketplace.com";
+
+        if (await context.Users.AnyAsync(u => u.Email == providerEmail))
+            return;
+
+        var providerRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "Provider");
+        if (providerRole is null) return;
+
+        var provider = new User
+        {
+            Name = "Professional Provider",
+            Email = providerEmail,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Provider@123456"),
+            Subscription = SubscriptionTier.Paid,
+            IsActive = true
+        };
+
+        context.Users.Add(provider);
+        await context.SaveChangesAsync();
+
+        context.UserRoles.Add(new UserRole { UserId = provider.Id, RoleId = providerRole.Id });
         await context.SaveChangesAsync();
     }
 }
