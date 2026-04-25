@@ -55,6 +55,7 @@ public class AuthService : IAuthService
             AccessToken = token,
             UserId = user.Id.ToString(),
             Email = user.Email,
+            Subscription = user.Subscription.ToString(),
             Roles = roles
         });
     }
@@ -73,6 +74,7 @@ public class AuthService : IAuthService
             AccessToken = token,
             UserId = user.Id.ToString(),
             Email = user.Email,
+            Subscription = user.Subscription.ToString(),
             Roles = roles
         });
     }

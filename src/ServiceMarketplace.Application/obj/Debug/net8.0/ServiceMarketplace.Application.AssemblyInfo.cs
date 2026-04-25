@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ServiceMarketplace.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5e26ed6f9040fd69463c6982c7b7c113ec9c5dc3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8a4a9febbf6319d7189479ca58eee997634c662c")]
 [assembly: System.Reflection.AssemblyProductAttribute("ServiceMarketplace.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ServiceMarketplace.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
